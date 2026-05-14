@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>razupi — Creative Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #06060f;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --accent: #7c3aed;
+      --accent2: #06b6d4;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --font: 'Space Grotesk', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow-x: hidden;
+    }
+
+    /* ── Canvas ── */
+    #canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: rgba(6,6,15,0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── Sections ── */
+    section { position: relative; z-index: 1; }
+
+    /* ── Hero ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.8rem;
+      font-family: var(--mono);
+      color: var(--muted);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.3s forwards;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.5s forwards;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #a78bfa, #38bdf8, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.7s forwards;
+    }
+
+    #typed { color: var(--accent2); font-family: var(--mono); }
+    #cursor {
+      display: inline-block;
+      width: 2px; height: 1.1em;
+      background: var(--accent2);
+      vertical-align: middle;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.9s forwards;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.8rem;
+      border-radius: 0.6rem;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #9333ea);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(124,58,237,0.35);
+    }
+
+    .btn-primary:hover { box-shadow: 0 8px 32px rgba(124,58,237,0.5); }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { background: rgba(255,255,255,0.08); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      opacity: 0;
+      animation: fadeIn 1s 1.5s forwards;
+    }
+
+    .scroll-arrow {
+      width: 20px; height: 20px;
+      border-right: 2px solid var(--muted);
+      border-bottom: 2px solid var(--muted);
+      transform: rotate(45deg);
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50% { transform: rotate(45deg) translateY(4px); }
+    }
+
+    /* ── Stats ── */
+    #stats {
+      padding: 4rem 4rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      backdrop-filter: blur(8px);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 2.8rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── Features ── */
+    #features {
+      padding: 7rem 4rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-tag {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      padding: 2rem;
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      backdrop-filter: blur(8px);
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.5s, transform 0.5s, border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(124,58,237,0.4);
+      box-shadow: 0 8px 32px rgba(124,58,237,0.12);
+    }
+
+    .card-icon {
+      width: 48px; height: 48px;
+      border-radius: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .card-icon.purple { background: rgba(124,58,237,0.15); }
+    .card-icon.cyan   { background: rgba(6,182,212,0.15); }
+    .card-icon.green  { background: rgba(52,211,153,0.15); }
+    .card-icon.pink   { background: rgba(236,72,153,0.15); }
+    .card-icon.orange { background: rgba(249,115,22,0.15); }
+    .card-icon.yellow { background: rgba(234,179,8,0.15); }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── Tech Stack ── */
+    #stack {
+      padding: 7rem 4rem;
+      background: linear-gradient(180deg, transparent, rgba(124,58,237,0.04), transparent);
+    }
+
+    .stack-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: default;
+    }
+
+    .pill:hover {
+      border-color: var(--accent);
+      transform: scale(1.04);
+    }
+
+    .pill-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── CTA ── */
+    #cta {
+      padding: 8rem 4rem;
+      text-align: center;
+    }
+
+    .cta-box {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 4rem;
+      border-radius: 1.5rem;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.05));
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-box h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .cta-box p {
+      color: var(--muted);
+      margin-bottom: 2rem;
+      line-height: 1.7;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 2.5rem 4rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    footer p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      #hero, #features, #stack, #cta { padding-left: 1.5rem; padding-right: 1.5rem; }
+      #stats { padding: 3rem 1.5rem; }
+      footer { padding: 2rem 1.5rem; }
+      .cta-box { padding: 2.5rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-logo" href="#"><span>//</span> razupi</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#cta">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="badge"><span class="badge-dot"></span>Available for projects</div>
+  <h1>Build things<br><span class="gradient-text">that matter.</span></h1>
+  <p class="hero-sub">
+    I'm <span id="typed"></span><span id="cursor"></span><br>
+    Crafting fast, beautiful, and meaningful digital experiences.
+  </p>
+  <div class="hero-actions">
+    <a href="#features" class="btn btn-primary">Explore Work ↓</a>
+    <a href="#cta" class="btn btn-ghost">Get in Touch</a>
+  </div>
+  <div class="scroll-hint">
+    <span>scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section id="stats">
+  <div class="stats-grid">
+    <div><div class="stat-num" data-target="42">0</div><div class="stat-label">Projects Shipped</div></div>
+    <div><div class="stat-num" data-target="3">0</div><div class="stat-label">Years of Experience</div></div>
+    <div><div class="stat-num" data-target="99">0</div><div class="stat-label">Lighthouse Score</div></div>
+    <div><div class="stat-num" data-target="12">0</div><div class="stat-label">Happy Clients</div></div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features">
+  <div class="section-header">
+    <div class="section-tag">What I Do</div>
+    <h2 class="section-title">End-to-end digital<br>craftsmanship</h2>
+    <p class="section-desc">From pixel-perfect interfaces to rock-solid backends — I bring ideas to life at every layer of the stack.</p>
+  </div>
+  <div class="features-grid">
+    <div class="card">
+      <div class="card-icon purple">⚡</div>
+      <div class="card-title">Frontend Engineering</div>
+      <div class="card-desc">Responsive, accessible, blazing-fast UIs using modern frameworks and performance best practices.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon cyan">🔧</div>
+      <div class="card-title">Backend Development</div>
+      <div class="card-desc">Scalable APIs and services built with reliability and clean architecture in mind.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon green">🎨</div>
+      <div class="card-title">UI / UX Design</div>
+      <div class="card-desc">Thoughtful design systems and interfaces that delight users and solve real problems.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon pink">🚀</div>
+      <div class="card-title">DevOps & CI/CD</div>
+      <div class="card-desc">Automated pipelines, container orchestration, and zero-downtime deployments.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon orange">🤖</div>
+      <div class="card-title">AI Integration</div>
+      <div class="card-desc">LLM-powered features, RAG pipelines, and intelligent automation baked into products.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon yellow">📊</div>
+      <div class="card-title">Data & Analytics</div>
+      <div class="card-desc">Dashboards, pipelines, and insights that turn raw data into actionable decisions.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Stack -->
+<section id="stack">
+  <div class="section-header">
+    <div class="section-tag">Tech Stack</div>
+    <h2 class="section-title">Tools of the trade</h2>
+    <p class="section-desc">A carefully chosen toolkit for building modern, production-grade software.</p>
+  </div>
+  <div class="stack-pills">
+    <div class="pill"><span class="pill-dot" style="background:#61dafb"></span>React</div>
+    <div class="pill"><span class="pill-dot" style="background:#000"></span>Next.js</div>
+    <div class="pill"><span class="pill-dot" style="background:#3178c6"></span>TypeScript</div>
+    <div class="pill"><span class="pill-dot" style="background:#f7df1e"></span>JavaScript</div>
+    <div class="pill"><span class="pill-dot" style="background:#3776ab"></span>Python</div>
+    <div class="pill"><span class="pill-dot" style="background:#00add8"></span>Go</div>
+    <div class="pill"><span class="pill-dot" style="background:#cc342d"></span>Ruby</div>
+    <div class="pill"><span class="pill-dot" style="background:#336791"></span>PostgreSQL</div>
+    <div class="pill"><span class="pill-dot" style="background:#dc382d"></span>Redis</div>
+    <div class="pill"><span class="pill-dot" style="background:#326ce5"></span>Kubernetes</div>
+    <div class="pill"><span class="pill-dot" style="background:#2496ed"></span>Docker</div>
+    <div class="pill"><span class="pill-dot" style="background:#ff9900"></span>AWS</div>
+    <div class="pill"><span class="pill-dot" style="background:#4285f4"></span>GCP</div>
+    <div class="pill"><span class="pill-dot" style="background:#06b6d4"></span>Tailwind CSS</div>
+    <div class="pill"><span class="pill-dot" style="background:#764abc"></span>GraphQL</div>
+    <div class="pill"><span class="pill-dot" style="background:#e34f26"></span>Rust</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-box">
+    <h2>Let's build something<br><span class="gradient-text">remarkable together.</span></h2>
+    <p>Have a project in mind? I'm always open to discussing new ideas, collaborations, or just talking tech.</p>
+    <a href="mailto:contact@razupi.dev" class="btn btn-primary" style="margin: 0 auto;">Say Hello →</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>© 2026 razupi. Built with curiosity.</p>
+  <div class="footer-links">
+    <a href="https://github.com/razupi" target="_blank">GitHub</a>
+    <a href="#">Twitter</a>
+    <a href="#">LinkedIn</a>
+  </div>
+</footer>
+
+<script>
+  /* ── Particle canvas ── */
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  const count = 80;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor() { this.reset(true); }
+    reset(initial) {
+      this.x = Math.random() * canvas.width;
+      this.y = initial ? Math.random() * canvas.height : canvas.height + 10;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = -(Math.random() * 0.5 + 0.2);
+      this.radius = Math.random() * 1.5 + 0.5;
+      this.alpha = Math.random() * 0.5 + 0.1;
+      this.color = Math.random() > 0.5 ? '124,58,237' : '6,182,212';
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.y < -10) this.reset(false);
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${this.color},${this.alpha})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < count; i++) particles.push(new Particle());
+
+  function drawConnections() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(124,58,237,${0.08 * (1 - dist / 120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    drawConnections();
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  /* ── Typing effect ── */
+  const phrases = ['a developer.', 'a designer.', 'a problem solver.', 'razupi.'];
+  let pi = 0, ci = 0, deleting = false;
+  const typedEl = document.getElementById('typed');
+
+  function type() {
+    const current = phrases[pi];
+    if (!deleting) {
+      typedEl.textContent = current.slice(0, ++ci);
+      if (ci === current.length) { deleting = true; setTimeout(type, 1800); return; }
+    } else {
+      typedEl.textContent = current.slice(0, --ci);
+      if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+    }
+    setTimeout(type, deleting ? 50 : 90);
+  }
+  setTimeout(type, 1200);
+
+  /* ── Counter animation ── */
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    const suffix = el.dataset.target.includes('+') ? '+' : '';
+    let current = 0;
+    const step = Math.ceil(target / 50);
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = current + suffix;
+      if (current >= target) clearInterval(timer);
+    }, 30);
+  }
+
+  /* ── Intersection Observer ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        const counters = entry.target.querySelectorAll('[data-target]');
+        counters.forEach(c => animateCounter(c));
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.card').forEach(el => observer.observe(el));
+  document.querySelectorAll('#stats .stats-grid > div').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
